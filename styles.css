@@ -1319,8 +1319,12 @@ input {
 }
 
 .start-time {
-  white-space: nowrap;
+  white-space: normal;
 }
+.category-start-row { display: block; margin: 0 0 10px; }
+.category-start-row:last-child { margin-bottom: 0; }
+.category-start-row small { display: block; font-size: 10px; color: #aaa; line-height: 1.4; }
+.category-start-row b { display: block; font-size: 13px; color: #fff; margin-top: 3px; }
 
 .participant-card-actions {
   padding: 17px 20px;

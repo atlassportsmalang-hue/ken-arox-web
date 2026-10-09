@@ -328,66 +328,76 @@ function searchParticipant() {
     return;
   }
 
-  const item = matches[0];
+  // A single athlete may compete in several categories.
+  // Collect all exact matching entries, but display only one result card.
+  const uniqueValues = (values) => [...new Map(
+    values.filter(Boolean).map(value => [normalizeParticipantSearch(value), value])
+  ).values()];
 
-  const athletes =
-    [
-      item.participant1,
-      item.participant2
-    ]
-    .filter(Boolean)
-    .map(escapeHtml)
-    .join(" & ");
+  const names = uniqueValues(matches.flatMap(item => [item.participant1, item.participant2]));
+  const athletes = names.map(escapeHtml).join(" & ");
+  const teams = uniqueValues(matches.map(item => item.team));
+  const title = teams.length === 1 ? teams[0] :
+    (matches.some(item => normalizeParticipantSearch(item.participant1) === query ||
+      normalizeParticipantSearch(item.participant2) === query)
+      ? (names.find(name => normalizeParticipantSearch(name) === query) || teams[0])
+      : teams.join(" / "));
 
-  const racePassButton =
-    item.racePass
-    ?
-    `<a
-      class="race-pass-btn private-pass-btn"
-      href="${escapeHtml(getRacePassDownloadUrl(item.racePass))}"
-      target="_blank"
-      rel="noopener noreferrer"
-    >
-      DOWNLOAD RACE PASS
-    </a>`
-    :
-    `<span class="race-pass-empty">RACE PASS NOT READY</span>`;
+  const categories = uniqueValues(matches.map(item => item.category));
+  const categoryLabel = categories.map(escapeHtml).join(" / ") || "-";
+  // Always show a separate time for every category, even when times match
+  // or one category has no estimated start in the spreadsheet yet.
+  const startLabel = categories.length > 1
+    ? categories.map(category => {
+        const matchingEntry = matches.find(item => item.category === category && item.estimatedStart)
+          || matches.find(item => item.category === category);
+        return `<span class="category-start-row"><small>${escapeHtml(category)}</small><b>${escapeHtml(matchingEntry?.estimatedStart || "BELUM TERISI")}</b></span>`;
+      }).join("")
+    : escapeHtml(matches.find(item => item.estimatedStart)?.estimatedStart || "BELUM TERISI");
+  const statuses = uniqueValues(matches.map(item => item.status));
+  const statusLabel = statuses.length === 1 ? statuses[0] : "REGISTERED";
+
+  const passes = [...new Map(matches.filter(item => item.racePass).map(item => [
+    getRacePassDownloadUrl(item.racePass), item
+  ])).values()];
+  const racePassButton = passes.length
+    ? passes.map((item, index) => `<a
+        class="race-pass-btn private-pass-btn"
+        href="${escapeHtml(getRacePassDownloadUrl(item.racePass))}"
+        target="_blank"
+        rel="noopener noreferrer"
+      >DOWNLOAD RACE PASS${passes.length > 1 ? ` — ${escapeHtml(item.category || String(index + 1))}` : ""}</a>`).join(" ")
+    : `<span class="race-pass-empty">RACE PASS NOT READY</span>`;
 
   result.innerHTML = `
     <article class="participant-private-card">
-
       <div class="participant-card-topline">
         <span>YOUR RACE INFORMATION</span>
-        <span class="status">${escapeHtml(item.status || "REGISTERED")}</span>
+        <span class="status">${escapeHtml(statusLabel)}</span>
       </div>
-
       <div class="participant-card-main">
         <div>
           <p class="participant-card-label">TEAM / ATHLETE</p>
-          <h3>${escapeHtml(item.team)}</h3>
-          ${athletes ? `<p class="participant-athletes">${athletes}</p>` : ""}
+          <h3>${escapeHtml(title)}</h3>
+          ${athletes && (teams.length === 1 || normalizeParticipantSearch(title) !== query)
+            ? `<p class="participant-athletes">${athletes}</p>` : ""}
         </div>
-
         <div class="participant-private-meta">
           <div>
             <span>CATEGORY</span>
-            <strong>${escapeHtml(item.category || "-")}</strong>
+            <strong>${categoryLabel}</strong>
           </div>
-
           <div>
             <span>EST. START</span>
-            <strong class="start-time">${escapeHtml(item.estimatedStart || "TBA")}</strong>
+            <strong class="start-time">${startLabel}</strong>
           </div>
         </div>
       </div>
-
       <div class="participant-card-actions">
         ${racePassButton}
       </div>
-
     </article>
   `;
-
 }
 
 
