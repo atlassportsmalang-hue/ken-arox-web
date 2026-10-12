@@ -151,6 +151,11 @@ async function loadParticipants() {
                 row[4] || ""
               ).trim(),
 
+            whatsapp:
+              String(
+                row[5] || ""
+              ).trim(),
+
             status:
               String(
                 row[9] || ""
@@ -250,6 +255,78 @@ function escapeHtml(value) {
 }
 
 
+// Lightweight client-side check only: sheet data and public Google Drive links
+// can still be inspected by visitors. This is NOT secure authentication.
+let currentRacePasses = [];
+let selectedRacePass = null;
+
+function openRacePassPrompt(item) {
+  if (!item) return;
+  selectedRacePass = item;
+  const modal = document.getElementById("racePassModal");
+  const input = document.getElementById("racePassPassword");
+  const error = document.getElementById("racePassError");
+  document.getElementById("racePassCategory").textContent = item.category || "RACE PASS";
+  input.value = "";
+  error.textContent = "";
+  modal.hidden = false;
+  document.body.classList.add("race-pass-modal-open");
+  input.focus();
+}
+
+function closeRacePassPrompt() {
+  document.getElementById("racePassModal").hidden = true;
+  document.body.classList.remove("race-pass-modal-open");
+  selectedRacePass = null;
+}
+
+// Accept international country codes (e.g. 62, 34), including either number
+// if the registration sheet contains multiple WhatsApp numbers separated by "/".
+function normalizeRacePassPhone(value) {
+  return String(value ?? "").replace(/[\s()+\-]/g, "").trim();
+}
+
+document.getElementById("participantResult")?.addEventListener("click", event => {
+  const button = event.target.closest("[data-race-pass-index]");
+  if (!button) return;
+  const index = Number(button.dataset.racePassIndex);
+  if (Number.isInteger(index)) openRacePassPrompt(currentRacePasses[index]);
+});
+
+document.getElementById("racePassForm")?.addEventListener("submit", event => {
+  event.preventDefault();
+  if (!selectedRacePass) return;
+  const input = normalizeRacePassPhone(document.getElementById("racePassPassword").value);
+  const expected = normalizeRacePassPhone(selectedRacePass.whatsapp);
+  const error = document.getElementById("racePassError");
+  if (!/^[1-9][0-9]{6,17}$/.test(input)) {
+    error.textContent = "Masukkan nomor WhatsApp dengan kode negara (contoh: 6281234567890 atau 34612345678).";
+    return;
+  }
+  const registeredNumbers = expected.split(/[\/;,]+/).map(normalizeRacePassPhone).filter(Boolean);
+  if (!registeredNumbers.includes(input)) {
+    error.textContent = "Password tidak cocok. Gunakan nomor WhatsApp yang dipakai saat pendaftaran.";
+    return;
+  }
+  const url = getRacePassDownloadUrl(selectedRacePass.racePass);
+  if (!url) {
+    error.textContent = "Race Pass belum tersedia. Hubungi panitia.";
+    return;
+  }
+  // Open from the submit interaction so browsers allow the new tab.
+  window.open(url, "_blank", "noopener,noreferrer");
+  closeRacePassPrompt();
+});
+
+document.querySelectorAll("[data-close-race-pass]").forEach(element => {
+  element.addEventListener("click", closeRacePassPrompt);
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !document.getElementById("racePassModal").hidden) {
+    closeRacePassPrompt();
+  }
+});
+
 function searchParticipant() {
 
   const input =
@@ -265,6 +342,8 @@ function searchParticipant() {
   if (!input || !result) {
     return;
   }
+
+  currentRacePasses = [];
 
   const query =
     normalizeParticipantSearch(
@@ -360,13 +439,14 @@ function searchParticipant() {
   const passes = [...new Map(matches.filter(item => item.racePass).map(item => [
     getRacePassDownloadUrl(item.racePass), item
   ])).values()];
+  // Keep the matching records for the access prompt. Never put phone numbers in HTML.
+  currentRacePasses = passes;
   const racePassButton = passes.length
-    ? passes.map((item, index) => `<a
+    ? passes.map((item, index) => `<button
         class="race-pass-btn private-pass-btn"
-        href="${escapeHtml(getRacePassDownloadUrl(item.racePass))}"
-        target="_blank"
-        rel="noopener noreferrer"
-      >DOWNLOAD RACE PASS${passes.length > 1 ? ` — ${escapeHtml(item.category || String(index + 1))}` : ""}</a>`).join(" ")
+        type="button"
+        data-race-pass-index="${index}"
+      >DOWNLOAD RACE PASS${passes.length > 1 ? ` — ${escapeHtml(item.category || String(index + 1))}` : ""}</button>`).join(" ")
     : `<span class="race-pass-empty">RACE PASS NOT READY</span>`;
 
   result.innerHTML = `

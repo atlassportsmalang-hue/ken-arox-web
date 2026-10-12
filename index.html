@@ -1394,6 +1394,30 @@
 
 
 
+
+<!-- RACE PASS PASSWORD PROMPT -->
+<div id="racePassModal" class="race-pass-modal" hidden>
+  <div class="race-pass-overlay" data-close-race-pass></div>
+  <section class="race-pass-dialog" role="dialog" aria-modal="true" aria-labelledby="racePassModalTitle">
+    <button class="race-pass-close" type="button" data-close-race-pass aria-label="Tutup">&times;</button>
+    <div class="race-pass-eyebrow">KEN AROX 2026</div>
+    <h2 id="racePassModalTitle">RACE PASS ACCESS</h2>
+    <p class="race-pass-selected">CATEGORY: <strong id="racePassCategory"></strong></p>
+    <p>Masukkan password untuk mengakses Race Pass kamu.</p>
+    <div class="race-pass-information">
+      <strong>PASSWORD INFORMATION</strong>
+      <p>Password adalah nomor WhatsApp yang digunakan saat pendaftaran KEN AROX 2026, diawali <b>kode negara masing-masing</b>.</p>
+      <small>Contoh Indonesia: 6281234567890 | Internasional (Spanyol): 34612345678</small>
+    </div>
+    <form id="racePassForm">
+      <label for="racePassPassword">PASSWORD</label>
+      <input id="racePassPassword" type="text" inputmode="numeric" autocomplete="off" placeholder="Kode negara + nomor WhatsApp (contoh: 6281234567890)" required aria-describedby="racePassError" />
+      <p id="racePassError" class="race-pass-error" role="alert"></p>
+      <button type="submit">UNLOCK RACE PASS &#8594;</button>
+    </form>
+  </section>
+</div>
+
 <!-- JAVASCRIPT -->
 
 <script src="script.js"></script>
