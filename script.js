@@ -122,9 +122,15 @@ async function loadParticipants() {
 
     participants =
       rows
-        .map(row => {
+        .map((row, rowIndex) => {
+
+          // Physical sheet row (row 1 is the header).
+          // Used to re-read WhatsApp exactly if gviz infers a mixed column type.
+          const sheetRow = rowIndex + 2;
 
           return {
+
+            sheetRow,
 
             no:
               row[0] || "",
@@ -283,7 +289,34 @@ function closeRacePassPrompt() {
 // Accept international country codes (e.g. 62, 34), including either number
 // if the registration sheet contains multiple WhatsApp numbers separated by "/".
 function normalizeRacePassPhone(value) {
+  // A Sheets numeric cell can be emitted in scientific notation. Convert it
+  // back to the full decimal string before matching.
+  if (typeof value === "number" && Number.isFinite(value)) value = value.toFixed(0);
   return String(value ?? "").replace(/[\s()+\-]/g, "").trim();
+}
+
+function whatsappMatches(rawValue, entered) {
+  return String(rawValue ?? "")
+    .split(/[\/;,]+/)
+    .map(normalizeRacePassPhone)
+    .some(phone => phone === entered);
+}
+
+// When WhatsApp column F contains numbers AND text (e.g. "34.../62..."),
+// the Google Visualization API may return a blank value for some rows.
+// Re-reading exactly ONE spreadsheet cell avoids mixed-column type inference.
+async function getWhatsAppFromExactSheetCell(sheetRow) {
+  if (!Number.isInteger(sheetRow) || sheetRow < 2) return "";
+  const url = `${gvizUrl(CONFIG.participantSheetId, CONFIG.participantGid)}&range=F${sheetRow}:F${sheetRow}`;
+  const response = await fetch(url, { cache: "no-store" });
+  if (!response.ok) throw new Error("Gagal membaca nomor WhatsApp dari Sheet");
+  const text = await response.text();
+  const start = text.indexOf("{");
+  const end = text.lastIndexOf("}");
+  if (start < 0 || end < start) throw new Error("Format Sheet tidak valid");
+  const data = JSON.parse(text.slice(start, end + 1));
+  const cell = data.table?.rows?.[0]?.c?.[0];
+  return cell?.f ?? cell?.v ?? "";
 }
 
 document.getElementById("participantResult")?.addEventListener("click", event => {
@@ -293,29 +326,46 @@ document.getElementById("participantResult")?.addEventListener("click", event =>
   if (Number.isInteger(index)) openRacePassPrompt(currentRacePasses[index]);
 });
 
-document.getElementById("racePassForm")?.addEventListener("submit", event => {
+document.getElementById("racePassForm")?.addEventListener("submit", async event => {
   event.preventDefault();
   if (!selectedRacePass) return;
+  const item = selectedRacePass;
   const input = normalizeRacePassPhone(document.getElementById("racePassPassword").value);
-  const expected = normalizeRacePassPhone(selectedRacePass.whatsapp);
   const error = document.getElementById("racePassError");
+  const submitButton = event.currentTarget.querySelector('button[type="submit"]');
   if (!/^[1-9][0-9]{6,17}$/.test(input)) {
     error.textContent = "Masukkan nomor WhatsApp dengan kode negara (contoh: 6281234567890 atau 34612345678).";
     return;
   }
-  const registeredNumbers = expected.split(/[\/;,]+/).map(normalizeRacePassPhone).filter(Boolean);
-  if (!registeredNumbers.includes(input)) {
+  error.textContent = "";
+  let valid = whatsappMatches(item.whatsapp, input);
+  if (!valid) {
+    if (submitButton) submitButton.disabled = true;
+    try {
+      // Fresh single-cell lookup also handles empty numbers caused by
+      // Google Sheets' mixed string/number column inference.
+      const exactValue = await getWhatsAppFromExactSheetCell(item.sheetRow);
+      valid = whatsappMatches(exactValue, input);
+    } catch (err) {
+      console.warn("WhatsApp lookup failed:", err);
+      error.textContent = "Verifikasi belum bisa dilakukan. Coba lagi beberapa saat.";
+      return;
+    } finally {
+      if (submitButton) submitButton.disabled = false;
+    }
+  }
+  if (selectedRacePass !== item) return;
+  if (!valid) {
     error.textContent = "Password tidak cocok. Gunakan nomor WhatsApp yang dipakai saat pendaftaran.";
     return;
   }
-  const url = getRacePassDownloadUrl(selectedRacePass.racePass);
+  const url = getRacePassDownloadUrl(item.racePass);
   if (!url) {
     error.textContent = "Race Pass belum tersedia. Hubungi panitia.";
     return;
   }
-  // Open from the submit interaction so browsers allow the new tab.
-  window.open(url, "_blank", "noopener,noreferrer");
-  closeRacePassPrompt();
+  // Same-tab navigation is not blocked after the asynchronous Sheet check.
+  window.location.assign(url);
 });
 
 document.querySelectorAll("[data-close-race-pass]").forEach(element => {
@@ -565,7 +615,11 @@ async function loadLeaderboard() {
 
     leaderboardData =
       rows
-        .map(row => {
+        .map((row, rowIndex) => {
+
+          // Physical sheet row (row 1 is the header).
+          // Used to re-read WhatsApp exactly if gviz infers a mixed column type.
+          const sheetRow = rowIndex + 2;
 
           return {
 
