@@ -1725,48 +1725,36 @@ input {
 }
 
 
-.sponsor-logo-box {
-
-  width:
-    min(
-      330px,
-      100%
-    );
-
-  min-height:
-    130px;
-
-  margin-top:
-    32px;
-
-  padding:
-    24px;
-
-  display:
-    flex;
-
-  align-items:
-    center;
-
-  justify-content:
-    center;
-
-  background:
-    white;
-
+.sponsor-logos {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 18px;
+  margin-top: 32px;
 }
 
+.sponsor-logo-box {
+  width: min(330px, 100%);
+  min-height: 150px;
+  padding: 20px 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+}
 
 .sponsor-logo-box img {
-
-  max-height:
-    80px;
-
-  object-fit:
-    contain;
-
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 145px;
+  object-fit: contain;
 }
 
+.sponsor-isoplus { background: #fff; }
+.sponsor-isoplus img { max-height: 110px; }
+.sponsor-aquviva { background: #111; border: 1px solid #383838; }
+.sponsor-aquviva img { max-height: 125px; }
 
 /* =========================================================
    GALLERY
@@ -2367,3 +2355,12 @@ footer {
 .race-pass-dialog .race-pass-error { color: #ff8585; min-height: 18px; font-size: 12px; }
 .race-pass-modal-open { overflow: hidden; }
 button.private-pass-btn { cursor: pointer; font-family: inherit; }
+
+/* Racepack pickup indicator: sourced from participant sheet column M. */
+.participant-private-meta .racepack-meta { grid-column: 1 / -1; }
+.racepack-category-row { display: block; margin-bottom: 8px; }
+.racepack-category-row:last-child { margin-bottom: 0; }
+.racepack-category-row small { display: block; margin-bottom: 4px; color: #aaa; font-size: 10px; font-weight: 700; }
+.participant-private-meta .racepack-state { display: inline-block; padding: 6px 10px; width: fit-content; font-size: 12px; letter-spacing: .02em; }
+.participant-private-meta .racepack-taken { color: #6ee7a3; border: 1px solid rgba(110,231,163,.45); background: rgba(110,231,163,.08); }
+.participant-private-meta .racepack-pending { color: #f4d20b; border: 1px solid rgba(244,210,11,.4); background: rgba(244,210,11,.07); }

@@ -177,7 +177,11 @@ async function loadParticipants() {
             racePass:
               String(
                 row[11] || ""
-              ).trim()
+              ).trim(),
+
+            // Column M: racepack pickup status.
+            racepackStatus:
+              String(row[12] || "").trim().toUpperCase()
 
           };
 
@@ -377,7 +381,7 @@ document.addEventListener("keydown", event => {
   }
 });
 
-function searchParticipant() {
+async function searchParticipant() {
 
   const input =
     document.getElementById(
@@ -394,6 +398,12 @@ function searchParticipant() {
   }
 
   currentRacePasses = [];
+
+  // Fetch the latest Google Sheet data for each deliberate search.
+  // A racepack pickup recorded by the committee becomes visible without refresh.
+  if (input.value.trim()) {
+    await loadParticipants();
+  }
 
   const query =
     normalizeParticipantSearch(
@@ -483,6 +493,13 @@ function searchParticipant() {
         return `<span class="category-start-row"><small>${escapeHtml(category)}</small><b>${escapeHtml(matchingEntry?.estimatedStart || "BELUM TERISI")}</b></span>`;
       }).join("")
     : escapeHtml(matches.find(item => item.estimatedStart)?.estimatedStart || "BELUM TERISI");
+  // Keep racepack information separate for competitors in multiple categories.
+  const racepackLabel = matches.map(item => {
+    const pickedUp = ["SUDAH", "SUDAH DIAMBIL", "DIAMBIL", "YES", "YA", "TRUE", "1"].includes(item.racepackStatus);
+    const label = pickedUp ? "SUDAH DIAMBIL" : "BELUM DIAMBIL";
+    const className = pickedUp ? "racepack-taken" : "racepack-pending";
+    return `<span class="racepack-category-row"><small>${escapeHtml(item.category || "PESERTA")}</small><b class="racepack-state ${className}">${label}</b></span>`;
+  }).join("");
   const statuses = uniqueValues(matches.map(item => item.status));
   const statusLabel = statuses.length === 1 ? statuses[0] : "REGISTERED";
 
@@ -520,6 +537,10 @@ function searchParticipant() {
           <div>
             <span>EST. START</span>
             <strong class="start-time">${startLabel}</strong>
+          </div>
+          <div class="racepack-meta">
+            <span>RACEPACK PICKUP</span>
+            <div class="racepack-values">${racepackLabel}</div>
           </div>
         </div>
       </div>
