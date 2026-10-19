@@ -2364,3 +2364,20 @@ button.private-pass-btn { cursor: pointer; font-family: inherit; }
 .participant-private-meta .racepack-state { display: inline-block; padding: 6px 10px; width: fit-content; font-size: 12px; letter-spacing: .02em; }
 .participant-private-meta .racepack-taken { color: #6ee7a3; border: 1px solid rgba(110,231,163,.45); background: rgba(110,231,163,.08); }
 .participant-private-meta .racepack-pending { color: #f4d20b; border: 1px solid rgba(244,210,11,.4); background: rgba(244,210,11,.07); }
+
+
+/* Registration form - KEN AROX */
+.ken-form { display: flex; flex-direction: column; gap: 9px; margin-top: 20px; }
+.ken-form label { display: block; margin-top: 6px; font-size: 12px; font-weight: 900; letter-spacing: .07em; }
+.ken-form label span { color: #ad240b; }
+.ken-form input, .ken-form select { display: block; box-sizing: border-box; width: 100%; min-width: 0; border: 2px solid #242424; border-radius: 6px; padding: 13px 12px; font: inherit; font-size: 15px; background: #fff; color: #111; }
+.ken-form input:focus, .ken-form select:focus { outline: 3px solid #e6bc0d; outline-offset: 1px; }
+.ken-form input[type=file] { font-size: 13px; padding: 10px; }
+.ken-form #kenP2Wrap { display: flex; flex-direction: column; gap: 9px; }
+.ken-form #kenP2Wrap[hidden] { display: none; }
+.ken-proof-note { display: block; line-height: 1.55; font-size: 12px; color: #444; }
+.ken-form-warning { font-size: 13px; line-height: 1.5; font-weight: 600; margin: 8px 0; }
+.ken-form .ken-submit { border: 0; cursor: pointer; font: inherit; font-weight: 900; white-space: normal; min-height: 50px; }
+.ken-form-feedback { font-size: 13px; line-height: 1.5; font-weight: 700; }
+.ken-form-feedback:empty { display: none; }
+.ken-form-tagline { text-align: center; font-size: 11px; font-weight: 900; line-height: 1.7; letter-spacing: .05em; margin-top: 8px; }

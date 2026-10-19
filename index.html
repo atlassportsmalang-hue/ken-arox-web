@@ -128,8 +128,7 @@
 
   <a
     class="btn btn-yellow nav-register"
-    href="https://q.me-qr.com/h4bmpj2s"
-    target="_blank"
+    href="#register"
   >
 
     REGISTER NOW
@@ -258,8 +257,7 @@
 
         <a
           class="btn btn-yellow"
-          href="https://q.me-qr.com/h4bmpj2s"
-          target="_blank"
+          href="#register"
         >
 
           REGISTER NOW
@@ -609,11 +607,7 @@
 
       <p class="register-copy">
 
-        Registrasi KEN AROX dilakukan melalui
-        WhatsApp panitia.
-
-        Pilih kategori kamu dan daftarkan
-        diri atau tim sekarang.
+        Isi formulir langsung di website. Setelah klik kirim, data pendaftaran akan disiapkan sebagai pesan WhatsApp ke panitia tanpa melalui link QR beriklan.
 
       </p>
 
@@ -655,17 +649,39 @@
 
 
 
-      <a
-        class="btn btn-black full"
-        href="https://q.me-qr.com/h4bmpj2s"
-        target="_blank"
-      >
+      <form id="kenAroxRegistration" class="ken-form" autocomplete="on">
+        <label for="kenTeam">NAMA TIM <span>*</span></label>
+        <input id="kenTeam" name="team" type="text" maxlength="100" placeholder="Nama tim / nama peserta single" required />
 
-        DAFTAR SEKARANG
+        <label for="kenCategory">KATEGORI <span>*</span></label>
+        <select id="kenCategory" name="category" required>
+          <option value="">Pilih kategori</option>
+          <option>Double Men</option><option>Double Women</option><option>Double Mix</option>
+          <option>Single Men</option><option>Single Women</option>
+        </select>
 
-      </a>
+        <label for="kenP1">NAMA PESERTA 1 <span>*</span></label>
+        <input id="kenP1" name="participant1" type="text" maxlength="100" placeholder="Nama lengkap peserta 1" required />
+        <div id="kenP2Wrap">
+          <label for="kenP2">NAMA PESERTA 2 <span>*</span></label>
+          <input id="kenP2" name="participant2" type="text" maxlength="100" placeholder="Nama lengkap peserta 2" required />
+        </div>
 
+        <label for="kenPhone">NO. WHATSAPP <span>*</span></label>
+        <input id="kenPhone" name="phone" type="tel" inputmode="tel" maxlength="22" placeholder="Contoh: 081234567890" required />
 
+        <label for="kenOrigin">ASAL / INSTANSI <span>*</span></label>
+        <input id="kenOrigin" name="origin" type="text" maxlength="120" placeholder="Komunitas, kampus, atau asal daerah" required />
+
+        <label for="kenProof">BUKTI PEMBAYARAN</label>
+        <input id="kenProof" name="proof" type="file" accept="image/*,.pdf,application/pdf" />
+        <small class="ken-proof-note">File tidak bisa terlampir otomatis lewat tautan WhatsApp. Setelah pesan terbuka, kirim bukti transfer langsung di chat panitia.</small>
+
+        <p class="ken-form-warning">Kuota terbatas untuk setiap kategori. Pastikan semua data sudah benar sebelum mendaftar.</p>
+        <button type="submit" class="btn btn-black full ken-submit">KIRIM PENDAFTARAN KE WHATSAPP →</button>
+        <p id="kenFormFeedback" class="ken-form-feedback" role="status" aria-live="polite"></p>
+        <p class="ken-form-tagline">KEN AROX 2026<br>RUN TOGETHER. FIGHT TOGETHER. FINISH TOGETHER.</p>
+      </form>
 
       <a
         class="contact-wa"

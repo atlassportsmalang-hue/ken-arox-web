@@ -1209,3 +1209,61 @@ setInterval(
 loadParticipants();
 
 loadLeaderboard();
+
+/* =========================================================
+   KEN AROX - WEBSITE REGISTRATION TO WHATSAPP
+   A wa.me link sends only text, not uploaded attachments.
+========================================================= */
+(function initKenRegistration() {
+  const form = document.getElementById('kenAroxRegistration');
+  if (!form) return;
+  const category = document.getElementById('kenCategory');
+  const participant2 = document.getElementById('kenP2');
+  const participant2Wrap = document.getElementById('kenP2Wrap');
+  const feedback = document.getElementById('kenFormFeedback');
+  const inputValue = (id) => document.getElementById(id).value.trim();
+
+  function updateCategory() {
+    const single = category.value.startsWith('Single');
+    participant2Wrap.hidden = single;
+    participant2.required = !single;
+    if (single) participant2.value = '';
+  }
+  category.addEventListener('change', updateCategory);
+  updateCategory();
+
+  form.addEventListener('submit', function (event) {
+    event.preventDefault();
+    if (!form.reportValidity()) return;
+    const phone = inputValue('kenPhone').replace(/[^0-9]/g, '');
+    if (phone.length < 9 || phone.length > 15) {
+      feedback.textContent = 'Periksa kembali nomor WhatsApp (9–15 angka).';
+      document.getElementById('kenPhone').focus();
+      return;
+    }
+
+    const message = [
+      '*FORMAT PENDAFTARAN*',
+      '',
+      'Nama Tim: ' + inputValue('kenTeam'),
+      'Kategori: ' + category.value,
+      'Nama Peserta 1: ' + inputValue('kenP1'),
+      'Nama Peserta 2: ' + (category.value.startsWith('Single') ? '-' : inputValue('kenP2')),
+      'No. WhatsApp: ' + inputValue('kenPhone'),
+      'Asal / Instansi: ' + inputValue('kenOrigin'),
+      '',
+      'Bukti pembayaran:',
+      '[Akan dikirim langsung di chat ini]',
+      '',
+      'Kuota terbatas untuk setiap kategori.',
+      'Pastikan data yang dikirim sudah benar sebelum melakukan pendaftaran.',
+      '',
+      '*KEN AROX 2026*',
+      'RUN TOGETHER. FIGHT TOGETHER. FINISH TOGETHER.'
+    ].join('\n');
+    const url = 'https://wa.me/6282122020108?text=' + encodeURIComponent(message);
+    feedback.textContent = 'WhatsApp akan terbuka dengan format pendaftaran. Tekan Kirim di WhatsApp, lalu lampirkan bukti transfer secara manual. Pendaftaran belum terkirim sampai kamu mengirim pesan di WhatsApp.';
+    const wa = window.open(url, '_blank', 'noopener,noreferrer');
+    if (!wa) window.location.href = url;
+  });
+})();
