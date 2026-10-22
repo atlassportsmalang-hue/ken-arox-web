@@ -1756,6 +1756,28 @@ input {
 .sponsor-aquviva { background: #111; border: 1px solid #383838; }
 .sponsor-aquviva img { max-height: 125px; }
 
+/* Product partners are intentionally smaller than main refreshment sponsors. */
+.sponsor-product-partners {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 14px;
+  max-width: 100%;
+}
+.sponsor-product-partners .sponsor-logo-box {
+  width: 158px;
+  min-height: 112px;
+  height: 112px;
+  padding: 10px 12px;
+}
+.sponsor-fitbar { background: #d0ed7c; }
+.sponsor-fitbar img { max-height: 84px; }
+.sponsor-zuna { background: #fff; }
+.sponsor-zuna img { max-height: 96px; }
+@media (max-width: 370px) {
+  .sponsor-product-partners .sponsor-logo-box { width: 140px; }
+}
+
 /* =========================================================
    GALLERY
 ========================================================= */
@@ -2381,3 +2403,39 @@ button.private-pass-btn { cursor: pointer; font-family: inherit; }
 .ken-form-feedback { font-size: 13px; line-height: 1.5; font-weight: 700; }
 .ken-form-feedback:empty { display: none; }
 .ken-form-tagline { text-align: center; font-size: 11px; font-weight: 900; line-height: 1.7; letter-spacing: .05em; margin-top: 8px; }
+
+
+/* Free Training — highlighted announcement on the homepage */
+.training-announcement {
+  position: relative;
+  background: linear-gradient(125deg, #9b1016 0%, #39070a 38%, #101010 80%);
+  border-top: 2px solid #f3d20b;
+  border-bottom: 2px solid #f3d20b;
+  color: #fff;
+  scroll-margin-top: 80px;
+}
+.training-announcement-inner { padding: 27px 0 24px; }
+.training-announcement-inner, .training-announcement-times { display: flex; align-items: center; gap: 28px; }
+.training-announcement-heading { flex: 1; min-width: 0; }
+.training-announcement-tag { display: inline-block; font: 800 11px/1.3 Inter, sans-serif; letter-spacing: 1.7px; color: #f3d20b; }
+.training-announcement h2 { font: 900 clamp(30px, 4vw, 54px)/1.05 Anton, Impact, sans-serif; letter-spacing: 1px; margin: 7px 0 10px; }
+.training-announcement h2 span { color: #f3d20b; }
+.training-announcement-heading p { margin: 0; font: 800 12px/1.5 Inter, sans-serif; letter-spacing: 0.5px; }
+.training-announcement-separator { color: #f3d20b; margin: 0 5px; }
+.training-announcement-times { gap: 12px; }
+.training-announcement-day { border: 1px solid rgba(255,255,255,.3); border-radius: 12px; padding: 16px 20px; background: rgba(0,0,0,.36); min-width: 195px; }
+.training-announcement-day span { color: #f3d20b; display: block; font-weight: 900; font-size: 13px; letter-spacing: 1.4px; }
+.training-announcement-day strong { display: block; white-space: nowrap; margin: 6px 0; font-weight: 900; font-size: 23px; }
+.training-announcement-day small { font-size: 11px; font-weight: 700; color: #ddd; }
+.training-announcement-note { border-left: 3px solid #f3d20b; padding-left: 10px; max-width: 140px; font-size: 12px; line-height: 1.5; font-weight: 700; }
+@media (max-width: 1100px) {
+ .training-announcement-inner { flex-wrap: wrap; }
+ .training-announcement-heading { flex-basis: 100%; }
+ .training-announcement-note { max-width: none; }
+}
+@media (max-width: 600px) {
+ .training-announcement-inner { gap: 18px; padding: 25px 0; }
+ .training-announcement-times { flex-direction: column; align-items: stretch; width: 100%; }
+ .training-announcement-day { min-width: 0; }
+ .training-announcement-note { margin: 0; }
+}
