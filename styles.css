@@ -1725,57 +1725,28 @@ input {
 }
 
 
-.sponsor-logos {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 18px;
-  margin-top: 32px;
-}
-
-.sponsor-logo-box {
-  width: min(330px, 100%);
-  min-height: 150px;
-  padding: 20px 26px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-sizing: border-box;
-}
-
-.sponsor-logo-box img {
-  display: block;
-  width: 100%;
-  height: auto;
-  max-height: 145px;
-  object-fit: contain;
-}
-
+.sponsor-logos { display: flex; flex-direction: column; align-items: center; gap: 24px; margin-top: 32px; width: 100%; }
+.sponsor-tier { display: flex; flex-wrap: wrap; align-items: stretch; justify-content: center; gap: 16px; width: 100%; }
+.sponsor-logo-box { display: flex; align-items: center; justify-content: center; box-sizing: border-box; overflow: hidden; border: 1px solid #292929; border-radius: 3px; padding: 18px; }
+.sponsor-logo-box img { display: block; width: 100%; height: 100%; object-fit: contain; }
+.sponsor-tier-main .sponsor-logo-box { width: min(420px, calc(50% - 8px)); height: 205px; padding: 25px; }
+.sponsor-tier-medium .sponsor-logo-box { width: min(320px, calc(50% - 8px)); height: 160px; padding: 22px; }
+.sponsor-tier-small .sponsor-logo-box { width: 175px; height: 112px; padding: 14px; }
 .sponsor-isoplus { background: #fff; }
-.sponsor-isoplus img { max-height: 110px; }
-.sponsor-aquviva { background: #111; border: 1px solid #383838; }
-.sponsor-aquviva img { max-height: 125px; }
-
-/* Product partners are intentionally smaller than main refreshment sponsors. */
-.sponsor-product-partners {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  max-width: 100%;
-}
-.sponsor-product-partners .sponsor-logo-box {
-  width: 158px;
-  min-height: 112px;
-  height: 112px;
-  padding: 10px 12px;
-}
+.sponsor-aquviva { background: #111; }
+.sponsor-urban { background: #121212; }
+.sponsor-pome { background: #29bce9; }
+.sponsor-extrajoss { background: #080808; }
+.sponsor-prodia { background: #fff000; }
+.sponsor-sehat { background: #090909; }
 .sponsor-fitbar { background: #d0ed7c; }
-.sponsor-fitbar img { max-height: 84px; }
 .sponsor-zuna { background: #fff; }
-.sponsor-zuna img { max-height: 96px; }
-@media (max-width: 370px) {
-  .sponsor-product-partners .sponsor-logo-box { width: 140px; }
+@media (max-width: 600px) {
+  .sponsor-logos { gap: 16px; }
+  .sponsor-tier { gap: 10px; }
+  .sponsor-tier-main .sponsor-logo-box { width: calc(50% - 5px); height: 125px; padding: 12px; }
+  .sponsor-tier-medium .sponsor-logo-box { width: calc(50% - 5px); height: 110px; padding: 12px; }
+  .sponsor-tier-small .sponsor-logo-box { width: calc(33.333% - 7px); height: 84px; padding: 8px; }
 }
 
 /* =========================================================
@@ -2438,4 +2409,128 @@ button.private-pass-btn { cursor: pointer; font-family: inherit; }
  .training-announcement-times { flex-direction: column; align-items: stretch; width: 100%; }
  .training-announcement-day { min-width: 0; }
  .training-announcement-note { margin: 0; }
+}
+
+/* =========================================================
+   JERSEY SIZE PICKER — PARTICIPANT LOOKUP
+========================================================= */
+.jersey-picker {
+  padding: 20px;
+  border-top: 1px solid #292929;
+  background: #141414;
+}
+.jersey-picker-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+.jersey-picker-heading span {
+  color: var(--yellow);
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: .14em;
+}
+.jersey-picker-heading h4 {
+  margin: 5px 0 0;
+  color: #fff;
+  font-family: "Anton", sans-serif;
+  font-size: 25px;
+  font-weight: 400;
+}
+.jersey-picker-heading > small {
+  color: #888;
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.jersey-picker-description {
+  margin: 9px 0 18px;
+  color: #999;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.jersey-athlete-list { display: grid; gap: 10px; }
+.jersey-athlete-row {
+  padding: 14px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+  border: 1px solid #303030;
+  background: #0d0d0d;
+}
+.jersey-athlete-info strong,
+.jersey-athlete-info small { display: block; }
+.jersey-athlete-info strong { color: #fff; font-size: 13px; }
+.jersey-athlete-info small {
+  margin-top: 5px;
+  color: #888;
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: .06em;
+}
+.jersey-size-options { display: flex; flex-wrap: wrap; gap: 6px; }
+.jersey-size-option {
+  min-width: 48px;
+  min-height: 38px;
+  padding: 0 10px;
+  color: #fff;
+  background: #242424;
+  border: 1px solid #555;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+  transition: .18s ease;
+}
+.jersey-size-option:hover:not(:disabled),
+.jersey-size-option.is-selected {
+  color: #000;
+  background: var(--yellow);
+  border-color: var(--yellow);
+}
+.jersey-size-option.is-full,
+.jersey-size-option:disabled {
+  color: #777;
+  background: #292929;
+  border-color: #383838;
+  cursor: not-allowed;
+  opacity: .72;
+}
+.jersey-stock-summary {
+  margin-top: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.jersey-stock-summary span {
+  padding: 6px 9px;
+  color: #aaa;
+  background: #202020;
+  font-size: 9px;
+}
+.jersey-stock-summary b { color: var(--yellow); }
+.jersey-picker-feedback {
+  min-height: 16px;
+  margin: 12px 0 0;
+  color: var(--yellow);
+  font-size: 11px;
+  font-weight: 800;
+}
+.jersey-picker-notice {
+  padding: 14px 18px;
+  color: #aaa;
+  border-top: 1px solid #292929;
+  background: #141414;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.6;
+  letter-spacing: .04em;
+}
+@media (max-width: 600px) {
+  .jersey-picker { padding: 16px; }
+  .jersey-picker-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
+  .jersey-athlete-row { grid-template-columns: 1fr; }
+  .jersey-size-options { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .jersey-size-option { min-width: 0; padding: 0 4px; }
 }

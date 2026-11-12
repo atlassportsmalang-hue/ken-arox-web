@@ -1,0 +1,25 @@
+KEN AROX — SETUP UKURAN JERSEY (H/I)
+
+- SINGLE: participant 1 (D) disimpan ke JERSEY 1 (H).
+- DOUBLE: participant 1 (D) ke H; participant 2 (E) ke JERSEY 2 (I).
+- Batas 50 atlet unik untuk setiap ukuran S, M, L, XL.
+- Atlet yang muncul di beberapa baris menggunakan satu kuota dan semua sel miliknya disinkronkan.
+
+AKTIVASI (WAJIB):
+1. Pastikan tab spreadsheet peserta memiliki gid 0 dan header JERSEY 1 di H serta JERSEY 2 di I.
+2. Buka project Google Apps Script yang dipakai URL jerseyApiUrl di script.js.
+3. Ganti SELURUH Code.gs dengan file Code.gs paket ini, lalu Save.
+4. Deploy > Manage deployments > Edit (ikon pensil) > Version: New version > Deploy.
+   Jika memakai deployment BARU, salin URL /exec yang baru ke jerseyApiUrl di script.js.
+5. Set Web app Execute as: Me dan Who has access: Anyone.
+6. Upload script.js terbaru ke hosting, lalu hard refresh browser.
+7. Tes nama atlet SINGLE dan DOUBLE, pastikan H dan I terisi sesuai atlet.
+
+PENTING:
+- Jangan gunakan Code.gs lama yang masih menulis ke kolom N.
+- Live Server hanya menjalankan frontend; Apps Script tetap harus di-deploy secara terpisah.
+- Mode no-cors pada browser tidak memperlihatkan isi respons POST Apps Script.
+  Website mengecek hasil dari spreadsheet dan menunggu beberapa kali jika belum muncul.
+- Jika spreadsheet tidak dapat dibaca publik via gviz, verifikasi frontend juga akan gagal.
+- Sistem memilih atlet berdasarkan nama; nama identik milik dua orang berbeda dapat tertukar.
+  Untuk keamanan lebih kuat, gunakan ID peserta unik dan autentikasi.

@@ -6,7 +6,9 @@ const CONFIG = {
     "1ygkNMrD_3KMRJ-eWR8Po-eDCYwIU6Iw-Wzd9WMEdAy4",
 
   participantGid: "0",
-  leaderboardGid: "0"
+  leaderboardGid: "0",
+  // Isi dengan URL Web App Google Apps Script setelah deployment.
+  jerseyApiUrl: "https://script.google.com/macros/s/AKfycbwQzrcK-vEu0MiCmRHikhyo2Pg5NTuPuwD0TQdRv0XF4BY6xAJNg6CjkjaTD01RP_U/exec"
 };
 
 let participants = [];
@@ -181,7 +183,11 @@ async function loadParticipants() {
 
             // Column M: racepack pickup status.
             racepackStatus:
-              String(row[12] || "").trim().toUpperCase()
+              String(row[12] || "").trim().toUpperCase(),
+
+            // H: participant 1 jersey; I: participant 2 jersey.
+            jersey1: String(row[7] || "").trim().toUpperCase(),
+            jersey2: String(row[8] || "").trim().toUpperCase()
 
           };
 
@@ -381,6 +387,96 @@ document.addEventListener("keydown", event => {
   }
 });
 
+const JERSEY_SIZES = ["S", "M", "L", "XL"];
+const JERSEY_LIMIT_PER_SIZE = 50;
+
+function getJerseyInventory() {
+  const athleteSizes = new Map();
+  participants.forEach(item => {
+    [[item.participant1, item.jersey1],
+     [item.category.startsWith("SINGLE") ? "" : item.participant2, item.jersey2]]
+      .forEach(([name, size]) => {
+        const key = normalizeParticipantSearch(name);
+        if (key && JERSEY_SIZES.includes(size) && !athleteSizes.has(key)) athleteSizes.set(key, size);
+      });
+  });
+
+  const counts = Object.fromEntries(JERSEY_SIZES.map(size => [size, 0]));
+  athleteSizes.forEach(size => {
+    if (Object.prototype.hasOwnProperty.call(counts, size)) counts[size] += 1;
+  });
+  return { counts, athleteSizes };
+}
+
+function renderJerseyPicker(athleteNames) {
+  const { counts, athleteSizes } = getJerseyInventory();
+  if (CONFIG.jerseyApiUrl.includes("PASTE_APPS_SCRIPT")) {
+    return `<div class="jersey-picker-notice">PILIHAN UKURAN JERSEY AKAN DIBUKA SETELAH ADMIN MENGAKTIFKAN KONEKSI PENYIMPANAN.</div>`;
+  }
+
+  return `<section class="jersey-picker" aria-label="Pilih ukuran jersey">
+    <div class="jersey-picker-heading">
+      <div><span>KEN AROX OFFICIAL MERCH</span><h4>PILIH UKURAN JERSEY</h4></div>
+      
+    </div>
+    <p class="jersey-picker-description">Pilih ukuran untuk masing-masing atlet. Pilihan akan tersimpan otomatis ke data peserta.</p>
+    <div class="jersey-athlete-list">${athleteNames.map(name => {
+      const key = normalizeParticipantSearch(name);
+      const selected = athleteSizes.get(key) || "";
+      const buttons = JERSEY_SIZES.map(size => {
+        const full = counts[size] >= JERSEY_LIMIT_PER_SIZE && selected !== size;
+        const className = ["jersey-size-option", selected === size ? "is-selected" : "", full ? "is-full" : ""].filter(Boolean).join(" ");
+        const label = size;
+        return `<button type="button" class="${className}" data-jersey-athlete="${escapeHtml(name)}" data-jersey-size="${size}" ${full ? "disabled" : ""} aria-pressed="${selected === size}">${label}</button>`;
+      }).join("");
+      return `<div class="jersey-athlete-row">
+        <div class="jersey-athlete-info"><strong>${escapeHtml(name)}</strong><small>${selected ? `UKURAN TERSIMPAN: ${selected}` : "BELUM MEMILIH UKURAN"}</small></div>
+        <div class="jersey-size-options">${buttons}</div>
+      </div>`;
+    }).join("")}</div>
+    <p class="jersey-picker-feedback" id="jerseyPickerFeedback" role="status" aria-live="polite"></p>
+  </section>`;
+}
+
+async function saveJerseySize(athlete, size, button) {
+  const feedback = document.getElementById("jerseyPickerFeedback");
+  const buttons = document.querySelectorAll("[data-jersey-athlete]");
+  if (!JERSEY_SIZES.includes(size) || !athlete) return;
+  if (CONFIG.jerseyApiUrl.includes("PASTE_APPS_SCRIPT")) {
+    if (feedback) feedback.textContent = "Koneksi penyimpanan belum diaktifkan oleh admin.";
+    return;
+  }
+
+  buttons.forEach(el => { el.disabled = true; });
+  if (feedback) feedback.textContent = `Menyimpan ukuran ${size} untuk ${athlete}...`;
+  try {
+    const body = new URLSearchParams({ athlete, size });
+    await fetch(CONFIG.jerseyApiUrl, {
+      method: "POST",
+      mode: "no-cors",
+      body
+    });
+
+    // Published gviz data may lag behind Apps Script writes; retry verification.
+    let saved = false;
+    for (let attempt = 0; attempt < 6; attempt++) {
+      await new Promise(resolve => setTimeout(resolve, 1100 + attempt * 500));
+      await loadParticipants();
+      saved = participants.some(item =>
+        (normalizeParticipantSearch(item.participant1) === normalizeParticipantSearch(athlete) && item.jersey1 === size) ||
+        (!item.category.startsWith("SINGLE") && normalizeParticipantSearch(item.participant2) === normalizeParticipantSearch(athlete) && item.jersey2 === size)
+      );
+      if (saved) break;
+    }
+    if (!saved) throw new Error("Ukuran belum terkonfirmasi. Periksa kolom H/I dan deployment Apps Script, lalu coba lagi.");
+    if (feedback) feedback.textContent = `BERHASIL! Ukuran ${size} untuk ${athlete} sudah tersimpan.`;
+    await searchParticipant();
+  } catch (error) {
+    if (feedback) feedback.textContent = error.message || "Gagal menyimpan ukuran. Silakan coba kembali.";
+    buttons.forEach(el => { el.disabled = false; });
+  }
+}
+
 async function searchParticipant() {
 
   const input =
@@ -515,6 +611,11 @@ async function searchParticipant() {
         data-race-pass-index="${index}"
       >DOWNLOAD RACE PASS${passes.length > 1 ? ` — ${escapeHtml(item.category || String(index + 1))}` : ""}</button>`).join(" ")
     : `<span class="race-pass-empty">RACE PASS NOT READY</span>`;
+  const isTeamSearch = matches.some(item => normalizeParticipantSearch(item.team) === query);
+  const jerseyAthletes = isTeamSearch
+    ? names
+    : names.filter(name => normalizeParticipantSearch(name) === query);
+  const jerseyPicker = jerseyAthletes.length ? renderJerseyPicker(jerseyAthletes) : "";
 
   result.innerHTML = `
     <article class="participant-private-card">
@@ -547,6 +648,7 @@ async function searchParticipant() {
       <div class="participant-card-actions">
         ${racePassButton}
       </div>
+      ${jerseyPicker}
     </article>
   `;
 }
@@ -597,6 +699,17 @@ if (participantSearch) {
   );
 
 }
+
+
+// Jersey size selection is delegated because the result card is rendered dynamically.
+document.getElementById("participantResult")?.addEventListener("click", event => {
+  const button = event.target.closest("[data-jersey-athlete][data-jersey-size]");
+  if (!button || button.disabled) return;
+  const athlete = button.dataset.jerseyAthlete;
+  const size = button.dataset.jerseySize;
+  if (!window.confirm(`Simpan ukuran jersey ${size} untuk ${athlete}?`)) return;
+  saveJerseySize(athlete, size, button);
+});
 
 
 /* =========================================================
